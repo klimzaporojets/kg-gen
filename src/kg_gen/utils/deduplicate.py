@@ -2,6 +2,7 @@ import unicodedata
 from kg_gen.models import Graph
 from semhash import SemHash
 import inflect
+from model2vec import StaticModel
 
 
 class DeduplicateList:
@@ -65,7 +66,10 @@ class DeduplicateList:
             normalized_items.add(singular)
 
         # Deduplicate the normalized strings
-        semhash = SemHash.from_records(records=list(normalized_items))
+        # semhash = SemHash.from_records(records=list(normalized_items))
+        # kzaporoj - fix to not download every time.
+        model = StaticModel.from_pretrained("minishlab/potion-base-8M", force_download=False)
+        semhash = SemHash.from_records(records=list(normalized_items), model=model)
         deduplication_result = semhash.self_deduplicate(threshold=self.threshold)
 
         self.deduplicated_items = len(deduplication_result.selected)
